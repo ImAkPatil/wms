@@ -21,41 +21,54 @@
 			$this->button_edit = true;
 			$this->button_delete = true;
 			$this->button_detail = true;
-			$this->button_show = true;
+			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
-			$this->button_export = false;
-			$this->table = "collectiondetails";
+			$this->button_export = true;
+			$this->table = "collectionmain";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"Date","name"=>"CollectionDate"];
-			$this->col[] = ["label"=>"Waste Type","name"=>"ID_FkWasteID","join"=>"masterwastecategories,CategoryName"];
-			$this->col[] = ["label"=>"Waste Qty","name"=>"WasteQty"];
-			$this->col[] = ["label"=>"Description","name"=>"Description"];
+			$this->col[] = ["label"=>"Vehical Number","name"=>"ID_FkDriverID","join"=>"masterdriverdetails,VehicalNumber"];
 			$this->col[] = ["label"=>"Trip Number","name"=>"ID_FkTripID","join"=>"mastertrips,TripNumber"];
-			$this->col[] = ["label"=>"ActionOn","name"=>"ActionOn"];
-			$this->col[] = ["label"=>"IsActive","name"=>"IsActive"];
-			$this->col[] = ["label"=>"UserID","name"=>"UserID"];
+			$this->col[] = ["label"=>"Total Waste Qty","name"=>"TotalWasteQty"];
+			$this->col[] = ["label"=>"Description","name"=>"Description"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
+			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'Collection Date','name'=>'CollectionDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Waste Type','name'=>'ID_FkWasteID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'WasteQty','name'=>'WasteQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Trip Number','name'=>'ID_FkTripID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Vehical Number','name'=>'ID_FkDriverID','type'=>'select2','validation'=>'required','width'=>'col-sm-10','datatable'=>'masterdriverdetails,VehicalNumber'];
+			$this->form[] = ['label'=>'Trip Number','name'=>'ID_FkTripID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'mastertrips,TripNumber'];
+			
+			$columns[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','width'=>'col-sm-10','type'=>'select','datatable'=>'masterwastecategories,CategoryName','required'=>true];
+			$columns[] = ['label'=>'QTY','name'=>'WasteQty','width'=>'col-sm-10', 'type'=>'text','required' => true];
+			$columns[] = ['label'=>'UOM','name'=>'UOM','type'=>'text','width'=>'col-sm-10','required'=>true, 'readonly' => true];
+			
+			$this->form[] = ['label'=>'Collection Detail','name'=>'collectiondetail','type'=>'child','width'=>'col-sm-10','columns'=>$columns,'table'=>'collectiondetail','foreign_key'=>'ID_FkCollectionID'];
+			
+			$this->form[] = ['label'=>'Total Waste Qty','name'=>'TotalWasteQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'readonly'=> true];
+			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
 			//$this->form[] = ['label'=>'Collection Date','name'=>'CollectionDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Waste Type','name'=>'ID_FkWasteID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'WasteQty','name'=>'WasteQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Trip Number','name'=>'ID_FkTripID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Vehical Number','name'=>'ID_FkDriverID','type'=>'select2','validation'=>'required','width'=>'col-sm-10','datatable'=>'masterdriverdetails,VehicalNumber'];
+			//$this->form[] = ['label'=>'Trip Number','name'=>'ID_FkTripID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'mastertrips,TripNumber'];
+			//$this->form[] = ['label'=>'Total Waste Qty','name'=>'TotalWasteQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
+			//
+			//$columns[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID', 'width'=>'col-sm-10','type'=>'select','datatable'=>'masterwastecategories,CategoryName','required'=>true];
+			//$columns[] = ['label'=>'QTY','name'=>'WasteQty','width'=>'col-sm-10', 'type'=>'text','required'=>true];
+			//$columns[] = ['label'=>'UOM','name'=>'UOM','type'=>'text','required'=>true];
+			//// $columns[] = ['label'=>'Sub Total','name'=>'subtotal','type'=>'number','formula'=>"[qty] * [price] - [discount]","readonly"=>true,'required'=>true];
+			//$this->form[] = ['label'=>'Collection Detail','name'=>'collectiondetail','type'=>'child','columns'=>$columns,'table'=>'collectiondetail','foreign_key'=>'ID_FkCollectionID'];
 			# OLD END FORM
 
 			/* 
@@ -155,9 +168,88 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = NULL;
+	        $this->script_js = "$(function() {
+							     	setInputFilter(document.getElementById('collectiondetailWasteQty'), function(value) {
+									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+									});
+									setInputFilter(document.getElementById('TotalWasteQty'), function(value) {
+									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+									});
+									resetData();
+									$('#collectiondetailID_FkWasteID').on('change', function(){
+										$('#collectiondetailUOM').val('tonne');
+									});
 
+									$('#btn-reset-form-collectiondetail').click(function(){
+										resetData();
+										$('#collectiondetailID_FkWasteID').select2('destroy').select2();
+									});
+									$('#CollectionDate').datepicker().datepicker('setDate', 'today');
+							  });
 
+							  function resetData(){
+							  	if($('#table-collectiondetail tbody tr:not(.trNull)').length > 0){
+							  		var totalwasteqty = 0;
+									$('#table-collectiondetail tbody tr:not(.trNull)').each(function() {
+										var wasteType = $(this).find('td.ID_FkWasteID').find('input').val();
+
+										// loop each select and set the selected value to disabled in all other selects
+									    $('#collectiondetailID_FkWasteID option').each(function(){ 
+									           if($(this).attr('value') == wasteType){            
+									               $(this).prop('disabled',true);               
+									           }
+									    });
+
+										var wasteqty = $(this).find('td.WasteQty').find('input').val();
+										totalwasteqty = parseFloat(totalwasteqty) + parseFloat(wasteqty);
+									});
+									$('#TotalWasteQty').attr('value', totalwasteqty);
+								}else{
+									$('#TotalWasteQty').attr('value', 0);
+								}
+							}
+
+							function resetDelete(){
+							  	if($('#table-collectiondetail tbody tr:not(.trNull)').length > 0){
+									var totalwasteqty = 0;
+									$('#collectiondetailID_FkWasteID option').each(function(){ 
+								        $(this).removeAttr('disabled');
+								    });
+									$('#collectiondetailID_FkWasteID').select2('destroy').select2();
+									$('#table-collectiondetail tbody tr:not(.trNull)').each(function() {
+										var wasteType = $(this).find('td.ID_FkWasteID').find('input').val();
+										$('#collectiondetailID_FkWasteID').find('option[value='+wasteType+']').prop('disabled',true);
+										// loop each select and set the selected value to disabled in all other selects
+									    var wasteqty = $(this).find('td.WasteQty').find('input').val();
+										totalwasteqty = parseFloat(totalwasteqty) + parseFloat(wasteqty);
+									});
+									$('#collectiondetailID_FkWasteID').select2('destroy').select2();
+									$('#TotalWasteQty').attr('value', totalwasteqty);
+								}else{
+									$('#collectiondetailID_FkWasteID option').each(function(){ 
+								        $(this).removeAttr('disabled');
+								    });
+									$('#TotalWasteQty').attr('value', 0);
+								}
+							}
+
+							$('#ID_FkDriverID').on('change', function(){
+								var vehicalnumber = $(this).children('option:selected').val();
+								$.ajax({
+									url: '/admin/collectionmain/gettrips',
+									type: 'post',
+									data:  {'vehicalnumber' : vehicalnumber},
+									success: function( data ) {
+							    		var data = JSON.parse(data);
+							    		$.each(data, function(i, v){
+							    			var val = v.ID_FkTripID;
+							    			$('#ID_FkTripID').find('option[value='+val+']').prop('disabled',true);
+							    		});
+							    		$('#ID_FkTripID').select2('destroy').select2();	
+									}
+								});
+							});
+							";
             /*
 	        | ---------------------------------------------------------------------- 
 	        | Include HTML Code before index table 
@@ -190,7 +282,7 @@
 	        | $this->load_js[] = asset("myfile.js");
 	        |
 	        */
-	        $this->load_js = array();
+	        $this->load_js = array(asset("js/common.js"));
 	        
 	        
 	        
@@ -202,7 +294,11 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = NULL;
+	        $this->style_css = "tfoot{display:none;}
+	        #table-collectiondetail tbody tr td span.td-label{
+	        font-weight:normal;
+	    }
+	        ";
 	        
 	        
 	        
@@ -265,9 +361,13 @@
 	    */
 	    public function hook_before_add(&$postdata) {        
 	        //Your code here
+	        $postdata['CollectionDate'] = date('Y-m-d', strtotime($postdata['CollectionDate']));
 	    	$postdata['IsActive'] = 1;
 	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
 	        $postdata['UserID'] = CRUDBooster::myId();
+	        if($postdata['TotalWasteQty'] <= 0){
+	        	CRUDBooster::redirect(CRUDBooster::mainpath("add/"),"Total Waste Quantity should not be zero or less than zero","warning");
+	        }
 	    }
 
 	    /* 
@@ -292,6 +392,13 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
+	        $postdata['CollectionDate'] = date('Y-m-d', strtotime($postdata['CollectionDate']));
+	    	$postdata['IsActive'] = 1;
+	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
+	        $postdata['UserID'] = CRUDBooster::myId();
+	        if($postdata['TotalWasteQty'] <= 0){
+	        	CRUDBooster::redirect(CRUDBooster::mainpath("edit/".$id),"Total Waste Quantity should not be zero or less than zero","warning");
+	        }
 
 	    }
 
@@ -316,7 +423,8 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-
+	    	DB::table('collectionmain')->where('id',$id)->update(['IsActive' => 0]);
+	    	DB::table('collectiondetail')->where('ID_FkCollectionID',$id)->update(['deleted_at' => date('Y-m-d H:i:s')]);
 	    }
 
 	    /* 
@@ -335,5 +443,12 @@
 
 	    //By the way, you can still create your own method in here... :) 
 
-
+	    public function gettrips(){
+	    	$VehicalNumber = $_POST['vehicalnumber'];
+	    	$response = array();
+	    	if (!empty($VehicalNumber)) {
+	    		$TripNumber = DB::table('collectionmain')->select('ID_FkTripID')->where('ID_FkDriverID',$VehicalNumber)->where('CollectionDate',date('Y-m-d'))->get();
+	    	}
+	    	echo json_encode($TripNumber);exit;
+	    }
 	}

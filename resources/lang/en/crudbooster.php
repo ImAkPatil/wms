@@ -79,7 +79,7 @@ return [
 
     'add_data_page_title' => 'Add :module',
     'edit_data_page_title' => 'Edit :module',
-    'detail_data_page_title' => 'Detail :module',
+    'detail_data_page_title' => ' :module',
 
     'default_module_description' => 'Data List',
 

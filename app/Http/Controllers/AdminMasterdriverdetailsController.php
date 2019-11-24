@@ -20,46 +20,46 @@
 			$this->button_add = true;
 			$this->button_edit = true;
 			$this->button_delete = true;
-			$this->button_detail = true;
-			$this->button_show = true;
+			$this->button_detail = false;
+			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
-			$this->button_export = false;
+			$this->button_export = true;
 			$this->table = "masterdriverdetails";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
+			$this->col[] = ["label"=>"Driver Id","name"=>"id"];
 			$this->col[] = ["label"=>"Driver Name","name"=>"DriverName"];
 			$this->col[] = ["label"=>"Mobile Number","name"=>"MobileNumber"];
 			$this->col[] = ["label"=>"Address","name"=>"Address"];
 			$this->col[] = ["label"=>"Vehical Number","name"=>"VehicalNumber"];
 			$this->col[] = ["label"=>"Vehical Description","name"=>"VehicalDescription"];
-			$this->col[] = ["label"=>"Organisation","name"=>"ID_FkOrgID","join"=>"masterorganisation,OrgName"];
-			$this->col[] = ["label"=>"IsActive","name"=>"IsActive"];
+			$this->col[] = ["label"=>"Vehical Capacity","name"=>"VehicalCapacity"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
+			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'Driver Name','name'=>'DriverName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Mobile Number','name'=>'MobileNumber','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Address','name'=>'Address','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Mobile Number','name'=>'MobileNumber','type'=>'text','validation'=>'required|regex:/[0-9]{9}/|min:10|max:10','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Address','name'=>'Address','type'=>'textarea','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Vehical Number','name'=>'VehicalNumber','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Vehical Description','name'=>'VehicalDescription','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Organisation','name'=>'ID_FkOrgID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Vehical Description','name'=>'VehicalDescription','type'=>'textarea','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Vehical Capacity','name'=>'VehicalCapacity','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
 			//$this->form[] = ['label'=>'Driver Name','name'=>'DriverName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Mobile Number','name'=>'MobileNumber','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Address','name'=>'Address','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Mobile Number','name'=>'MobileNumber','type'=>'text','validation'=>'required|regex:/[0-9]{9}/|min:10|max:10','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Address','name'=>'Address','type'=>'textarea','width'=>'col-sm-10'];
 			//$this->form[] = ['label'=>'Vehical Number','name'=>'VehicalNumber','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Vehical Description','name'=>'VehicalDescription','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Organisation','name'=>'ID_FkOrgID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Is Active','name'=>'IsActive','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Action On','name'=>'ActionOn','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'User ID','name'=>'UserID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Vehical Description','name'=>'VehicalDescription','type'=>'textarea','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Vehical Capacity','name'=>'VehicalCapacity','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# OLD END FORM
 
 			/* 
@@ -159,7 +159,14 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = NULL;
+	        $this->script_js = "$(function() {
+							     	setInputFilter(document.getElementById('MobileNumber'), function(value) {
+									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+									});
+									setInputFilter(document.getElementById('VehicalCapacity'), function(value) {
+									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+									}); 
+							  });";
 
 
             /*
@@ -194,7 +201,7 @@
 	        | $this->load_js[] = asset("myfile.js");
 	        |
 	        */
-	        $this->load_js = array();
+	        $this->load_js = array(asset("js/common.js"));
 	        
 	        
 	        
@@ -206,7 +213,7 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = NULL;
+	        $this->style_css = "tfoot{display:none;}";
 	        
 	        
 	        
@@ -296,7 +303,9 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
-
+	    	$postdata['IsActive'] = 1;
+	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
+	        $postdata['UserID'] = CRUDBooster::myId();
 	    }
 
 	    /* 
@@ -320,7 +329,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-
+	    	DB::table('masterdriverdetails')->where('id',$id)->update(['IsActive' => 0]);
 	    }
 
 	    /* 

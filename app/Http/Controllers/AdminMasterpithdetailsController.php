@@ -5,7 +5,7 @@
 	use DB;
 	use CRUDBooster;
 
-	class AdminMasterwastesubcategoriesController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminMasterpithdetailsController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -25,34 +25,35 @@
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "masterwastesubcategories";
+			$this->table = "masterpithdetails";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"Sub-Cat Id","name"=>"id"];
-			$this->col[] = ["label"=>"SubCategory Name","name"=>"SubCategoryName"];
-			$this->col[] = ["label"=>"Description","name"=>"Description"];
-			$this->col[] = ["label"=>"Waste Type","name"=>"ID_FkWasteID","join"=>"masterwastecategories,CategoryName"];
-			$this->col[] = ["label"=>"Capacity","name"=>"Capacity"];
+			$this->col[] = ["label"=>"Pith","name"=>"Pith"];
+			$this->col[] = ["label"=>"PithSize","name"=>"PithSize"];
+			$this->col[] = ["label"=>"Unit","name"=>"ID_FkUnitID","join"=>"masterunitdetails,Units"];
 			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
-			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
 			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
-			$this->form[] = ['label'=>'Capacity','name'=>'Capacity','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Pith','name'=>'Pith','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'PithSize','name'=>'PithSize','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Unit','name'=>'ID_FkUnitID','type'=>'select2','datatable'=>'masterunitdetails,Units','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
-			//$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
+			//$this->form[] = ["label"=>"Pith","name"=>"Pith","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"PithSize","name"=>"PithSize","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"ID FkUnitID","name"=>"ID_FkUnitID","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"IsActive","name"=>"IsActive","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"ActionOn","name"=>"ActionOn","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
+			//$this->form[] = ["label"=>"UserID","name"=>"UserID","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"IsSync","name"=>"IsSync","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
 			# OLD END FORM
 
 			/* 
@@ -303,7 +304,7 @@
 	    */
 	    public function hook_after_edit($id) {
 	        //Your code here 
-
+	    	DB::table('masterpithdetails')->where('id',$id)->update(['IsActive' => 0]);
 	    }
 
 	    /* 
@@ -315,7 +316,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-	    	DB::table('masterwastesubcategories')->where('id',$id)->update(['IsActive' => 0]);
+
 	    }
 
 	    /* 

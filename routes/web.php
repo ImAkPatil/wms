@@ -14,3 +14,13 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::post('/admin/collectionmain/gettrips','AdminCollectiondetailsController@gettrips');
+
+Route::post('/admin/processingdetails/getwastesubtype','AdminProcessingdetailsController@getwastesubtype');
+Route::post('/admin/processingdetails/getwastecapacity','AdminProcessingdetailsController@getwastecapacity');
+Route::post('/admin/processingdetails/getwastecategory','AdminProcessingdetailsController@getwastecategory');
+Route::post('/admin/processingdetails/getpreviousstock','AdminProcessingdetailsController@getpreviousstock');
+Route::post('/admin/processingdetails/getpiths','AdminProcessingdetailsController@getpiths');
+Route::post('/admin/processingdetails/getunits','AdminProcessingdetailsController@getunits');
+
+Route::post('/admin/salesdetails/getcategory','AdminSalesdetailsController@getcategory');

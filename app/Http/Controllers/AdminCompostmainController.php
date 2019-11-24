@@ -5,7 +5,7 @@
 	use DB;
 	use CRUDBooster;
 
-	class AdminMasterwastesubcategoriesController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminCompostmainController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -20,39 +20,45 @@
 			$this->button_add = true;
 			$this->button_edit = true;
 			$this->button_delete = true;
-			$this->button_detail = false;
+			$this->button_detail = true;
 			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "masterwastesubcategories";
+			$this->table = "compostmain";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"Sub-Cat Id","name"=>"id"];
-			$this->col[] = ["label"=>"SubCategory Name","name"=>"SubCategoryName"];
+			$this->col[] = ["label"=>"Compost Date","name"=>"CompostDate"];
+			$this->col[] = ["label"=>"Total Qty","name"=>"TotalQty"];
 			$this->col[] = ["label"=>"Description","name"=>"Description"];
-			$this->col[] = ["label"=>"Waste Type","name"=>"ID_FkWasteID","join"=>"masterwastecategories,CategoryName"];
-			$this->col[] = ["label"=>"Capacity","name"=>"Capacity"];
-			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
-			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
-			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive"];
+			$this->col[] = ["label"=>"Added On","name"=>"ActionOn"];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
-			$this->form[] = ['label'=>'Capacity','name'=>'Capacity','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Compost Date','name'=>'CompostDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-10'];
+
+			$columns[] = ['label'=>'Waste Category','name'=>'ID_FkWasteSCID','width'=>'col-sm-10','type'=>'select','datatable'=>'masterwastesubcategories,SubCategoryName','required'=>true];
+			$columns[] = ['label'=>'Quantity','name'=>'Quantity','width'=>'col-sm-10', 'type'=>'text','required' => true];
+			$this->form[] = ['label'=>'Compost Detail','name'=>'compostdetail','type'=>'child','width'=>'col-sm-10','columns'=>$columns,'table'=>'compostdetail','foreign_key'=>'ID_FkCompostID'];
+
+			$this->form[] = ['label'=>'Total Qty','name'=>'TotalQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'readonly'=> true];
+			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'text','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
-			//$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
+			//$this->form[] = ["label"=>"CompostDate","name"=>"CompostDate","type"=>"date","required"=>TRUE,"validation"=>"required|date"];
+			//$this->form[] = ["label"=>"TotalQty","name"=>"TotalQty","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Description","name"=>"Description","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"IsActive","name"=>"IsActive","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"ActionOn","name"=>"ActionOn","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
+			//$this->form[] = ["label"=>"UserID","name"=>"UserID","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"IsSync","name"=>"IsSync","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
 			# OLD END FORM
 
 			/* 
@@ -152,7 +158,64 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = NULL;
+	        $this->script_js = "$(function() {
+							     	setInputFilter(document.getElementById('TotalQty'), function(value) {
+									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+									});
+									setInputFilter(document.getElementById('compostdetailQuantity'), function(value) {
+									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+									});
+									$('#CompostDate').datepicker().datepicker('setDate', 'today');
+									resetData();
+									$('#btn-reset-form-compostdetail').click(function(){
+										resetData();
+									});
+							  });
+
+							  function resetData(){
+							  	if($('#table-compostdetail tbody tr:not(.trNull)').length > 0){
+							  		var totalwasteqty = 0;
+									$('#table-compostdetail tbody tr:not(.trNull)').each(function() {
+										var wasteType = $(this).find('td.ID_FkWasteSCID').find('input').val();
+										// loop each select and set the selected value to disabled in all other selects
+									    $('#compostdetailID_FkWasteSCID option').each(function(){ 
+									           if($(this).attr('value') == wasteType){            
+									               $(this).prop('disabled',true);               
+									           }
+									    });
+									    $('#compostdetailID_FkWasteSCID').select2('destroy').select2();
+									    var wasteqty = $(this).find('td.Quantity').find('input').val();
+										totalwasteqty = parseFloat(totalwasteqty) + parseFloat(wasteqty);
+									});
+									$('#TotalQty').attr('value', totalwasteqty);
+								}else{
+									$('#TotalQty').attr('value', 0);
+								}
+							}
+
+							function resetDelete(){
+							  	if($('#table-compostdetail tbody tr:not(.trNull)').length > 0){
+									var totalwasteqty = 0;
+									$('#compostdetailID_FkWasteSCID option').each(function(){ 
+								        $(this).removeAttr('disabled');
+								    });
+									$('#compostdetailID_FkWasteSCID').select2('destroy').select2();
+									$('#table-compostdetail tbody tr:not(.trNull)').each(function() {
+									    var wasteType = $(this).find('td.ID_FkWasteSCID').find('input').val();
+									    $('#compostdetailID_FkWasteSCID').find('option[value='+wasteType+']').prop('disabled',true);
+									    var wasteqty = $(this).find('td.Quantity').find('input').val();
+										totalwasteqty = parseFloat(totalwasteqty) + parseFloat(wasteqty);
+									});
+									$('#compostdetailID_FkWasteSCID').select2('destroy').select2();
+									$('#TotalQty').attr('value', totalwasteqty);
+								}else{
+									$('#compostdetailID_FkWasteSCID option').each(function(){ 
+								        $(this).removeAttr('disabled');
+								    });
+									$('#TotalQty').attr('value', 0);
+								}
+							}
+							  ";
 
 
             /*
@@ -187,7 +250,7 @@
 	        | $this->load_js[] = asset("myfile.js");
 	        |
 	        */
-	        $this->load_js = array();
+	        $this->load_js = array(asset("js/common.js"));
 	        
 	        
 	        
@@ -262,6 +325,7 @@
 	    */
 	    public function hook_before_add(&$postdata) {        
 	        //Your code here
+	        $postdata['CompostDate'] = date('Y-m-d', strtotime($postdata['CompostDate']));
 	    	$postdata['IsActive'] = 1;
 	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
 	        $postdata['UserID'] = CRUDBooster::myId();
@@ -289,6 +353,7 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
+	    	$postdata['CompostDate'] = date('Y-m-d', strtotime($postdata['CompostDate']));
 	    	$postdata['IsActive'] = 1;
 	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
 	        $postdata['UserID'] = CRUDBooster::myId();
@@ -315,7 +380,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-	    	DB::table('masterwastesubcategories')->where('id',$id)->update(['IsActive' => 0]);
+	    	DB::table('compostmain')->where('id',$id)->update(['IsActive' => 0]);
 	    }
 
 	    /* 

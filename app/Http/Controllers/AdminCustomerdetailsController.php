@@ -5,7 +5,7 @@
 	use DB;
 	use CRUDBooster;
 
-	class AdminMasterwastesubcategoriesController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminCustomerdetailsController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -20,39 +20,36 @@
 			$this->button_add = true;
 			$this->button_edit = true;
 			$this->button_delete = true;
-			$this->button_detail = false;
+			$this->button_detail = true;
 			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "masterwastesubcategories";
+			$this->table = "customerdetails";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"Sub-Cat Id","name"=>"id"];
-			$this->col[] = ["label"=>"SubCategory Name","name"=>"SubCategoryName"];
-			$this->col[] = ["label"=>"Description","name"=>"Description"];
-			$this->col[] = ["label"=>"Waste Type","name"=>"ID_FkWasteID","join"=>"masterwastecategories,CategoryName"];
-			$this->col[] = ["label"=>"Capacity","name"=>"Capacity"];
+			$this->col[] = ["label"=>"Customer Name","name"=>"CustomerName"];
+			$this->col[] = ["label"=>"Mobile Number","name"=>"MobileNumber"];
+			$this->col[] = ["label"=>"Address","name"=>"Address"];
 			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
-			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
 			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
-			$this->form[] = ['label'=>'Capacity','name'=>'Capacity','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Custome Name','name'=>'CustomerName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Mobile Number','name'=>'MobileNumber','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Address','name'=>'Address','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
-			//$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
+			//$this->form[] = ['label'=>'CustomerName','name'=>'CustomerName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'MobileNumber','name'=>'MobileNumber','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Address','name'=>'Address','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			# OLD END FORM
 
 			/* 
@@ -315,7 +312,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-	    	DB::table('masterwastesubcategories')->where('id',$id)->update(['IsActive' => 0]);
+	    	DB::table('customerdetails')->where('id',$id)->update(['IsActive' => 0]);
 	    }
 
 	    /* 

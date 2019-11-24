@@ -20,8 +20,8 @@
 			$this->button_add = true;
 			$this->button_edit = true;
 			$this->button_delete = true;
-			$this->button_detail = true;
-			$this->button_show = true;
+			$this->button_detail = false;
+			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
@@ -32,6 +32,9 @@
 			$this->col = [];
 			$this->col[] = ["label"=>"Trip Number","name"=>"TripNumber"];
 			$this->col[] = ["label"=>"Trip Details","name"=>"TripDetails"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
+			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
@@ -190,7 +193,7 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = NULL;
+	        $this->style_css = "tfoot{display:none;}";
 	        
 	        
 	        
@@ -253,7 +256,9 @@
 	    */
 	    public function hook_before_add(&$postdata) {        
 	        //Your code here
-
+	    	$postdata['IsActive'] = 1;
+	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
+	        $postdata['UserID'] = CRUDBooster::myId();
 	    }
 
 	    /* 
@@ -278,7 +283,9 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
-
+	    	$postdata['IsActive'] = 1;
+	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
+	        $postdata['UserID'] = CRUDBooster::myId();
 	    }
 
 	    /* 
@@ -302,7 +309,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-
+			DB::table('mastertrips')->where('id',$id)->update(['IsActive' => 0]);
 	    }
 
 	    /* 

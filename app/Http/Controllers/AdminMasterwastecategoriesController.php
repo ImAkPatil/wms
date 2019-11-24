@@ -20,8 +20,8 @@
 			$this->button_add = true;
 			$this->button_edit = true;
 			$this->button_delete = true;
-			$this->button_detail = true;
-			$this->button_show = true;
+			$this->button_detail = false;
+			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
@@ -30,27 +30,24 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
+			$this->col[] = ["label"=>"Cat Id","name"=>"id"];
 			$this->col[] = ["label"=>"Category Name","name"=>"CategoryName"];
 			$this->col[] = ["label"=>"Discription","name"=>"Discription"];
-			$this->col[] = ["label"=>"Is Active","name"=>"IsActive"];
-			$this->col[] = ["label"=>"Added Date","name"=>"ActionOn"];
-			$this->col[] = ["label"=>"Added By","name"=>"UserID"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
+			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'Category Name','name'=>'CategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Discription','name'=>'Discription','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Is Active','name'=>'IsActive','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Discription','name'=>'Discription','type'=>'textarea','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
 			//$this->form[] = ['label'=>'Category Name','name'=>'CategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Discription','name'=>'Discription','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Is Active','name'=>'IsActive','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Action On','name'=>'ActionOn','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'User ID','name'=>'UserID','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'Discription','name'=>'Discription','type'=>'textarea','width'=>'col-sm-10'];
 			# OLD END FORM
 
 			/* 
@@ -197,7 +194,7 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = NULL;
+	        $this->style_css = "tfoot{display:none;}";
 	        
 	        
 	        
@@ -287,7 +284,9 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
-
+	    	$postdata['IsActive'] = 1;
+	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
+	        $postdata['UserID'] = CRUDBooster::myId();
 	    }
 
 	    /* 
@@ -311,7 +310,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-
+	    	DB::table('masterwastecategories')->where('id',$id)->update(['IsActive' => 0]);
 	    }
 
 	    /* 

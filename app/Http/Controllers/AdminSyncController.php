@@ -5,7 +5,7 @@
 	use DB;
 	use CRUDBooster;
 
-	class AdminMasterwastesubcategoriesController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminSyncController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -14,45 +14,35 @@
 			$this->limit = "20";
 			$this->orderby = "id,desc";
 			$this->global_privilege = false;
-			$this->button_table_action = true;
-			$this->button_bulk_action = true;
+			$this->button_table_action = false;
+			$this->button_bulk_action = false;
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
-			$this->button_edit = true;
-			$this->button_delete = true;
+			$this->button_edit = false;
+			$this->button_delete = false;
 			$this->button_detail = false;
 			$this->button_show = false;
-			$this->button_filter = true;
+			$this->button_filter = false;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "masterwastesubcategories";
+			$this->table = "serversynclog";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"Sub-Cat Id","name"=>"id"];
-			$this->col[] = ["label"=>"SubCategory Name","name"=>"SubCategoryName"];
-			$this->col[] = ["label"=>"Description","name"=>"Description"];
-			$this->col[] = ["label"=>"Waste Type","name"=>"ID_FkWasteID","join"=>"masterwastecategories,CategoryName"];
-			$this->col[] = ["label"=>"Capacity","name"=>"Capacity"];
-			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
-			$this->col[] = ["label"=>"Action On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
-			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
+			$this->col[] = ["label"=>"Id","name"=>"id"];
+			$this->col[] = ["label"=>"Table Name","name"=>"TableName"];
+			$this->col[] = ["label"=>"Sync Date","name"=>"SyncDate"];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
-			$this->form[] = ['label'=>'Capacity','name'=>'Capacity','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
-			//$this->form[] = ['label'=>'SubCategory Name','name'=>'SubCategoryName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Description','name'=>'Description','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Waste Category','name'=>'ID_FkWasteID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
 			# OLD END FORM
 
 			/* 
@@ -199,7 +189,7 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = "tfoot{display:none;}";
+	        $this->style_css = NULL;
 	        
 	        
 	        
@@ -262,9 +252,8 @@
 	    */
 	    public function hook_before_add(&$postdata) {        
 	        //Your code here
-	    	$postdata['IsActive'] = 1;
-	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
-	        $postdata['UserID'] = CRUDBooster::myId();
+	    	echo '<here>';
+	    	exit;
 	    }
 
 	    /* 
@@ -289,9 +278,7 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
-	    	$postdata['IsActive'] = 1;
-	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
-	        $postdata['UserID'] = CRUDBooster::myId();
+
 	    }
 
 	    /* 
@@ -315,7 +302,7 @@
 	    */
 	    public function hook_before_delete($id) {
 	        //Your code here
-	    	DB::table('masterwastesubcategories')->where('id',$id)->update(['IsActive' => 0]);
+
 	    }
 
 	    /* 
@@ -333,6 +320,17 @@
 
 
 	    //By the way, you can still create your own method in here... :) 
+	    public function getAdd() {
+		  //First, Add an auth
+			if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE || $this->button_add==FALSE) {    
+			    CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+		  	}	   
+		   //Create your own query 
+		   $data = [];
+		   $data['page_title'] = 'Sync Data';
+		   //Create a view. Please use `cbView` method instead of view method from laravel.
+		   $this->cbView('sync.custom_sync_view',$data);
+		}
 
 
 	}
