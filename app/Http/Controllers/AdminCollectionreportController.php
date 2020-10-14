@@ -11,11 +11,11 @@
 
 			# START CONFIGURATION DO NOT REMOVE THIS LINE
 			$this->title_field = "id";
-			$this->limit = "20";
+			$this->limit = "1000";
 			$this->orderby = "id,desc";
-			$this->global_privilege = false;
+			$this->global_privilege = true;
 			$this->button_table_action = true;
-			$this->button_bulk_action = false;
+			$this->button_bulk_action = true;
 			$this->button_action_style = "button_icon";
 			$this->button_add = false;
 			$this->button_edit = false;
@@ -24,13 +24,22 @@
 			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
-			$this->button_export = true;
-			$this->table = "customreports";
+			$this->button_export = false;
+			$this->table = "report_collection";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-
+			$this->col[] = ["label"=>"Id","name"=>"id"];
+			$this->col[] = ["label"=>"CollectionDate","name"=>"CollectionDate"];
+			$this->col[] = ["label"=>"VehicalNumber","name"=>"VehicalNumber"];
+			$this->col[] = ["label"=>"VehicalCapacity","name"=>"VehicalCapacity"];
+			$this->col[] = ["label"=>"TripNumber","name"=>"TripNumber"];
+			$this->col[] = ["label"=>"TotalWasteQty","name"=>"TotalWasteQty"];
+			$this->col[] = ["label"=>"DryWasteQty","name"=>"DryWasteQty"];
+			$this->col[] = ["label"=>"WetWasteQty","name"=>"WetWasteQty"];
+			$this->col[] = ["label"=>"HazardousWasteQty","name"=>"HazardousWasteQty"];
+			$this->col[] = ["label"=>"EWasteQty","name"=>"EWasteQty"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
@@ -139,7 +148,7 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = NULL;
+	        $this->script_js = "";
 
 
             /*
@@ -174,7 +183,7 @@
 	        | $this->load_js[] = asset("myfile.js");
 	        |
 	        */
-	        $this->load_js = array();
+	        $this->load_js = array(asset("js/export/dataTables.buttons.min.js"), asset("js/export/jszip.min.js"), asset("js/export/pdfmake.min.js"), asset("js/export/vfs_fonts.js"), asset("js/export/buttons.html5.min.js"), asset("js/export/buttons.colVis.min.js"),asset("js/reports.js"));
 	        
 	        
 	        
@@ -317,16 +326,23 @@
 
 	    //By the way, you can still create your own method in here... :) 
 
-	    public function getIndex() {
+	   public function getIndex() {
 		  //First, Add an auth
 		   if(!CRUDBooster::isView()) CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		   
 		   //Create your own query 
 		   $data = [];
 		   $data['page_title'] = 'Collection Report';
-		   $data['result'] = DB::table('collectionmain')->orderby('id','desc')->paginate(10);
-		    
+		   if(!empty($_GET['cstrdt']) && !empty($_GET['cenddt'])){
+		   		$srtDt = date('Y-m-d', strtotime($_GET['cstrdt']));
+		   		$endDt = date('Y-m-d', strtotime($_GET['cenddt']));
+		   		$data['result'] = DB::table('report_collection')->whereBetween('CollectionDate', [$srtDt, $endDt])->orderby('id','desc')->paginate(1000);
+		   }else{
+		   		$data['result'] = DB::table('report_collection')->orderby('id','desc')->paginate(1000);
+		   }
+		   
 		   //Create a view. Please use `cbView` method instead of view method from laravel.
 		   $this->cbView('reports.collection_report_view',$data);
 		}
+
 	}

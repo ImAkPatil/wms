@@ -24,3 +24,9 @@ Route::post('/admin/processingdetails/getpiths','AdminProcessingdetailsControlle
 Route::post('/admin/processingdetails/getunits','AdminProcessingdetailsController@getunits');
 
 Route::post('/admin/salesdetails/getcategory','AdminSalesdetailsController@getcategory');
+Route::post('/admin/salesdetails/getsalesstock','AdminSalesdetailsController@getsalesstock');
+Route::post('/admin/salesdetails/getwastetype','AdminSalesdetailsController@getwastetype');
+
+Route::post('/admin/compostmain/getcompostprocessstock','AdminCompostmainController@getcompostprocessstock');
+
+//Route::post('/admin/admin/collectionreport/cust-filter', 'AdminCollectionreportController@custFilter');

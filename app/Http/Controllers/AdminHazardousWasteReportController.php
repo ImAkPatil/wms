@@ -5,7 +5,7 @@
 	use DB;
 	use CRUDBooster;
 
-	class AdminWetwastereportController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminHazardousWasteReportController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -25,7 +25,7 @@
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "report_wetwaste";
+			$this->table = "report_hazardouswaste";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
@@ -327,11 +327,11 @@
 		   
 		   //Create your own query 
 		   $data = [];
-		   $data['page_title'] = 'Wet Waste Report';
-		   $data['result'] = DB::table('report_wetwaste')->orderby('id','desc')->paginate(10);
+		   $data['page_title'] = 'Hazardous Waste Report';
+		   $data['result'] = DB::table('report_hazardouswaste')->orderby('id','desc')->paginate(1000);
 		    
 		   //Create a view. Please use `cbView` method instead of view method from laravel.
-		   $this->cbView('reports.wet_waste_report_view',$data);
+		   $this->cbView('reports.hazardous_waste_report_view',$data);
 		}
 
 	}

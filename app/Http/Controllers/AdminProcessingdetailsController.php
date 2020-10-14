@@ -12,13 +12,13 @@
 			# START CONFIGURATION DO NOT REMOVE THIS LINE
 			$this->title_field = "id";
 			$this->limit = "20";
-			$this->orderby = "id,desc";
+			$this->orderby = "id,asc";
 			$this->global_privilege = false;
 			$this->button_table_action = true;
-			$this->button_bulk_action = true;
+			$this->button_bulk_action = false;
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
-			$this->button_edit = true;
+			$this->button_edit = false;
 			$this->button_delete = true;
 			$this->button_detail = true;
 			$this->button_show = false;
@@ -30,12 +30,25 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
+
+			$this->col[] = ["label"=>"Sr No","name"=>"id"];
+
 			$this->col[] = ["label"=>"ProcessDate","name"=>"ProcessDate"];
+
+			$this->col[] = ["label"=>"Waste Type","name"=>"(select CategoryName from masterwastecategories where masterwastesubcategories.ID_FkWasteID = masterwastecategories.id) as waste_type"];
+
 			$this->col[] = ["label"=>"Waste Sub Type","name"=>"ID_PkWasteSCID","join"=>"masterwastesubcategories,SubCategoryName"];
+
 			$this->col[] = ["label"=>"Category","name"=>"ID_FkCategoryID","join"=>"mastercategory,Category"];
+			
+			$this->col[] = ["label"=>"Unit","name"=>"(select Units from masterunitdetails where masterpithdetails.ID_FkUnitID = masterunitdetails.id) as unit"];
+
 			$this->col[] = ["label"=>"Pith","name"=>"ID_FkPithID","join"=>"masterpithdetails,Pith"];
+
 			$this->col[] = ["label"=>"IntakeQty","name"=>"IntakeQty"];
+
 			$this->col[] = ["label"=>"ProcessQty","name"=>"ProcessQty"];
+
 			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
 			$this->col[] = ["label"=>"Added On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
 			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
@@ -45,14 +58,19 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'Process Date','name'=>'ProcessDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-8'];
 			$this->form[] = ['label'=>'Waste Type','name'=>'ID_PkWasteID','type'=>'select2','width'=>'col-sm-8','datatable'=>'masterwastecategories,CategoryName'];
+			$this->form[] = ['label'=>'Collection Quantity','name'=>'CollectionQuantity','type'=>'text','width'=>'col-sm-4', 'readonly' => true];
 			$this->form[] = ['label'=>'Waste Sub Type','name'=>'ID_PkWasteSCID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-6','datatable'=>'masterwastesubcategories,SubCategoryName'];
 			$this->form[] = ['label'=>'Capacity','name'=>'Capacity','type'=>'text','width'=>'col-sm-4'];
 			$this->form[] = ['label'=>'Category','name'=>'ID_FkCategoryID','type'=>'select2','width'=>'col-sm-6','datatable'=>'mastercategory,Category'];
 			$this->form[] = ['label'=>'Unit','name'=>'ID_FkUnitID','type'=>'select2','width'=>'col-sm-6','datatable'=>'masterunitdetails,Units'];
-			$this->form[] = ['label'=>'Pith','name'=>'ID_FkPithID','type'=>'select2','width'=>'col-sm-6','datatable'=>'masterpithdetails,Pith'];
+			$this->form[] = ['label'=>'Pith','name'=>'ID_FkPithID','type'=>'select2','width'=>'col-sm-6','datatable'=>'masterpithdetails,Pith','datatable_format'=>"Pith,' - ',PithSize"];
 			$this->form[] = ['label'=>'Intake Qty','name'=>'IntakeQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-8'];
 			$this->form[] = ['label'=>'Stock','name'=>'Stock','type'=>'text','width'=>'col-sm-8'];
 			$this->form[] = ['label'=>'Process Qty','name'=>'ProcessQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-8'];
+			$this->form[] = ['label'=>'Unit Generated Qty','name'=>'UnitGeneratedQty','type'=>'text', 'width'=>'col-sm-8'];
+			$this->form[] = ['label'=>'Kandi Kolsa Qty','name'=>'KandiKolasaQty','type'=>'text', 'width'=>'col-sm-8'];
+			$this->form[] = ['label'=>'Bio Char Qty','name'=>'BioCharQty','type'=>'text', 'width'=>'col-sm-8'];
+
 			$this->form[] = ['label'=>'Net Balance','name'=>'NetBalance','type'=>'text','width'=>'col-sm-8'];
 			# END FORM DO NOT REMOVE THIS LINE
 
@@ -163,9 +181,7 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = "$(function() {
-									$('#ProcessDate').datepicker().datepicker('setDate', 'today');
-							  });";
+	        $this->script_js = null;
 
 
             /*
@@ -216,6 +232,10 @@
 						        #form-group-ID_FkCategoryID, #form-group-ID_FkUnitID{
 							        /*float:left;*/
 							    }
+							    #CollectionQuantity, #NetBalance{
+							    	color: red;
+    								font-weight: 600;
+							    }
 							    /* Small Devices, Tablets */
 								@media only screen and (min-width : 768px) {
 								 	/*#form-group-ID_FkUnitID{
@@ -236,6 +256,9 @@
 										width: 100%;
 									}
 								}
+								.disabled.day{
+						       	color:#9b9898 !important;
+						       } 
 						        ";
 	        
 	        
@@ -304,6 +327,10 @@
 	        unset($postdata['Capacity']);
 	        unset($postdata['ID_FkUnitID']);
 	        unset($postdata['NetBalance']);
+	        unset($postdata['CollectionQuantity']);
+	        unset($postdata['UnitGeneratedQty']);
+	        unset($postdata['KandiKolasaQty']);
+	        unset($postdata['BioCharQty']);
 	    	$postdata['ProcessDate'] = date('Y-m-d', strtotime($postdata['ProcessDate']));
 	    	$postdata['IsActive'] = 1;
 	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
@@ -319,7 +346,18 @@
 	    */
 	    public function hook_after_add($id) {        
 	        //Your code here
-
+	        if($_POST['ID_PkWasteSCID'] == 12 || $_POST['ID_PkWasteSCID'] == 13){
+	        	if($_POST['ID_PkWasteSCID'] == 13){
+		        	$evm['BioCharQty'] = $_POST['BioCharQty'];
+					$evm['KandiKolasaQty'] = $_POST['KandiKolasaQty'];
+		        }
+		        if($_POST['ID_PkWasteSCID'] == 12){
+		        	$evm['UnitGeneratedQty'] = $_POST['UnitGeneratedQty'];
+		        }
+		    	$evm['ID_FkProcessingID'] = $id;
+				
+				DB::table('gardenbiogasprocess')->insert($evm);
+	        }
 	    }
 
 	    /* 
@@ -338,7 +376,7 @@
 	        unset($postdata['Capacity']);
 	        unset($postdata['ID_FkUnitID']);
 	        unset($postdata['NetBalance']);
-
+	        unset($postdata['CollectionQuantity']);
 	    	$postdata['ProcessDate'] = date('Y-m-d', strtotime($postdata['ProcessDate']));
 	    	$postdata['IsActive'] = 1;
 	        $postdata['ActionOn'] = date('Y-m-d H:i:s');
@@ -387,11 +425,34 @@
 
 	    public function getwastesubtype(){
 	    	$wasteId = $_POST['wasteId'];
+	    	$processDate = isset($_POST['processDate']) ? date('Y-m-d', strtotime($_POST['processDate'])) : '';
 	    	$response = array();
 	    	if (!empty($wasteId)) {
 	    		$subType = DB::table('masterwastesubcategories')->select('id', 'SubCategoryName')->where('ID_FkWasteID',$wasteId)->where('IsActive', 1)->get();
 	    	}
-	    	echo json_encode($subType);exit;
+	    	if(!empty($wasteId) && !empty($processDate)){
+	    		$collectionQty = DB::table('collectionmain')->select('WasteQty')->join('collectiondetail', 'collectionmain.id', '=', 'collectiondetail.ID_FkCollectionID')->where('ID_FkWasteID',$wasteId)->where('CollectionDate',$processDate)->where('IsActive', 1)->get();
+
+	    		$processQty = DB::table('processingdetails')->select('IntakeQty')->join('masterwastesubcategories', 'masterwastesubcategories.id', '=', 'processingdetails.ID_PkWasteSCID')->where('masterwastesubcategories.ID_FkWasteID',$wasteId)->where('processingdetails.ProcessDate',$processDate)->where('processingdetails.IsActive', 1)->get();
+	    	}
+	    	$tempcltqty  = $tmpprsqty = 0;
+	    	if (!empty($collectionQty)) {
+	    		foreach ($collectionQty as $key => $value) {
+	    	 		$tempcltqty = $tempcltqty + $value->WasteQty;
+	    	 	}
+	    	}
+
+	    	if (!empty($processQty)) {
+	    		foreach ($processQty as $key => $value) {
+	    	 		$tmpprsqty = $tmpprsqty + $value->IntakeQty;
+	    	 	} 
+	    		
+	    	}
+
+	    	$finalQty = $tempcltqty - $tmpprsqty;
+	    	$result['collectionQty'] = $finalQty;
+	    	$result['subType'] = $subType;
+	    	echo json_encode($result);exit;
 	    }
 
 	    public function getwastecapacity(){
@@ -450,7 +511,7 @@
 	    	$unitId = $_POST['unitId'];
 	    	$response = array();
 	    	if (!empty($unitId)) {
-	    		$piths = DB::table('masterpithdetails')->select('id', 'Pith')->where('ID_FkUnitID',$unitId)->where('IsActive', 1)->get();
+	    		$piths = DB::table('masterpithdetails')->select('id', 'Pith', 'PithSize')->where('ID_FkUnitID',$unitId)->where('IsActive', 1)->get();
 	    	}
 	    	echo json_encode($piths);exit;
 	    }

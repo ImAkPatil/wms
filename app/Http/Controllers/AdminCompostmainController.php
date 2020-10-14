@@ -15,7 +15,7 @@
 			$this->orderby = "id,desc";
 			$this->global_privilege = false;
 			$this->button_table_action = true;
-			$this->button_bulk_action = true;
+			$this->button_bulk_action = false;
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
 			$this->button_edit = true;
@@ -33,17 +33,19 @@
 			$this->col[] = ["label"=>"Compost Date","name"=>"CompostDate"];
 			$this->col[] = ["label"=>"Total Qty","name"=>"TotalQty"];
 			$this->col[] = ["label"=>"Description","name"=>"Description"];
-			$this->col[] = ["label"=>"Status","name"=>"IsActive"];
-			$this->col[] = ["label"=>"Added On","name"=>"ActionOn"];
-			$this->col[] = ["label"=>"Added By","name"=>"UserID"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
+			$this->col[] = ["label"=>"Added On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
+			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'Compost Date','name'=>'CompostDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-10'];
 
-			$columns[] = ['label'=>'Waste Category','name'=>'ID_FkWasteSCID','width'=>'col-sm-10','type'=>'select','datatable'=>'masterwastesubcategories,SubCategoryName','required'=>true];
-			$columns[] = ['label'=>'Quantity','name'=>'Quantity','width'=>'col-sm-10', 'type'=>'text','required' => true];
+			$columns[] = ['label'=>'Waste Sub type','name'=>'ID_FkWasteSCID','width'=>'col-sm-10','type'=>'select','datatable'=>'masterwastesubcategories,SubCategoryName','required'=>true,'datatable_where'=>'ID_FkWasteID = 1 AND IsActive = 1'];
+
+			$columns[] = ['label'=>'Actual Output','name'=>'Quantity','width'=>'col-sm-10', 'type'=>'text','required' => true];
+
 			$this->form[] = ['label'=>'Compost Detail','name'=>'compostdetail','type'=>'child','width'=>'col-sm-10','columns'=>$columns,'table'=>'compostdetail','foreign_key'=>'ID_FkCompostID'];
 
 			$this->form[] = ['label'=>'Total Qty','name'=>'TotalQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'readonly'=> true];
@@ -158,64 +160,7 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = "$(function() {
-							     	setInputFilter(document.getElementById('TotalQty'), function(value) {
-									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
-									});
-									setInputFilter(document.getElementById('compostdetailQuantity'), function(value) {
-									    return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
-									});
-									$('#CompostDate').datepicker().datepicker('setDate', 'today');
-									resetData();
-									$('#btn-reset-form-compostdetail').click(function(){
-										resetData();
-									});
-							  });
-
-							  function resetData(){
-							  	if($('#table-compostdetail tbody tr:not(.trNull)').length > 0){
-							  		var totalwasteqty = 0;
-									$('#table-compostdetail tbody tr:not(.trNull)').each(function() {
-										var wasteType = $(this).find('td.ID_FkWasteSCID').find('input').val();
-										// loop each select and set the selected value to disabled in all other selects
-									    $('#compostdetailID_FkWasteSCID option').each(function(){ 
-									           if($(this).attr('value') == wasteType){            
-									               $(this).prop('disabled',true);               
-									           }
-									    });
-									    $('#compostdetailID_FkWasteSCID').select2('destroy').select2();
-									    var wasteqty = $(this).find('td.Quantity').find('input').val();
-										totalwasteqty = parseFloat(totalwasteqty) + parseFloat(wasteqty);
-									});
-									$('#TotalQty').attr('value', totalwasteqty);
-								}else{
-									$('#TotalQty').attr('value', 0);
-								}
-							}
-
-							function resetDelete(){
-							  	if($('#table-compostdetail tbody tr:not(.trNull)').length > 0){
-									var totalwasteqty = 0;
-									$('#compostdetailID_FkWasteSCID option').each(function(){ 
-								        $(this).removeAttr('disabled');
-								    });
-									$('#compostdetailID_FkWasteSCID').select2('destroy').select2();
-									$('#table-compostdetail tbody tr:not(.trNull)').each(function() {
-									    var wasteType = $(this).find('td.ID_FkWasteSCID').find('input').val();
-									    $('#compostdetailID_FkWasteSCID').find('option[value='+wasteType+']').prop('disabled',true);
-									    var wasteqty = $(this).find('td.Quantity').find('input').val();
-										totalwasteqty = parseFloat(totalwasteqty) + parseFloat(wasteqty);
-									});
-									$('#compostdetailID_FkWasteSCID').select2('destroy').select2();
-									$('#TotalQty').attr('value', totalwasteqty);
-								}else{
-									$('#compostdetailID_FkWasteSCID option').each(function(){ 
-								        $(this).removeAttr('disabled');
-								    });
-									$('#TotalQty').attr('value', 0);
-								}
-							}
-							  ";
+	        $this->script_js = null;
 
 
             /*
@@ -250,7 +195,7 @@
 	        | $this->load_js[] = asset("myfile.js");
 	        |
 	        */
-	        $this->load_js = array(asset("js/common.js"));
+	        $this->load_js = array(asset("js/compost.js"));
 	        
 	        
 	        
@@ -262,7 +207,9 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = "tfoot{display:none;}";
+	        $this->style_css = "tfoot{display:none;} .disabled.day{
+	       	color:#9b9898 !important;
+	       } ";
 	        
 	        
 	        
@@ -381,6 +328,7 @@
 	    public function hook_before_delete($id) {
 	        //Your code here
 	    	DB::table('compostmain')->where('id',$id)->update(['IsActive' => 0]);
+	    	DB::table('compostdetail')->where('ID_FkCompostID',$id)->update(['deleted_at' => date('Y-m-d H:i:s')]);
 	    }
 
 	    /* 
@@ -398,6 +346,37 @@
 
 
 	    //By the way, you can still create your own method in here... :) 
+	    public function getcompostprocessstock(){
+	    	$pstock = $cstock = $stock = 0;$response = array();
+	    	$wasteSubId = $_POST['wasteSubId'];
+	    	$processDate = isset($_POST['compostDate']) ? date('Y-m-d', strtotime($_POST['compostDate'])) : '';
+	    	if (!empty($wasteSubId) && !empty($processDate)) {
 
+		    	$process_result = DB::table('processingdetails')->select(DB::raw('(ProcessQty) as pstock'))->where('ID_PkWasteSCID',$wasteSubId)->where('ProcessDate', '<=' ,$processDate)->where('IsActive', 1)->get();
+
+
+		    	$compost_result = DB::table('compostmain')->select(DB::raw('(TotalQty) as cstock'))->join('compostdetail', 'compostmain.id', '=', 'compostdetail.ID_FkCompostID')->where('ID_FkWasteSCID',$wasteSubId)->where('CompostDate', '<=' ,$processDate)->where('IsActive', 1)->get();
+
+		    	if (!empty($process_result)) {
+		    		$temppStock = 0;
+		    		foreach ($process_result as $key => $value) {
+		    	 		$temppStock = $temppStock + $value->pstock;
+		    	 	} 
+		    		$pstock = $temppStock;
+		    	}
+
+		    	if (!empty($compost_result)) {
+		    		$tempcStock = 0;
+		    		foreach ($compost_result as $key => $value) {
+		    	 		$tempcStock = $tempcStock + $value->cstock;
+		    	 	} 
+		    		$cstock = $tempcStock;
+		    	}
+
+		    	$stock = $pstock - $cstock;
+
+		    }	
+	    	echo json_encode($stock);exit;
+	    }
 
 	}

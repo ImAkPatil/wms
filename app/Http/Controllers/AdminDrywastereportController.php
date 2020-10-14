@@ -24,8 +24,8 @@
 			$this->button_show = false;
 			$this->button_filter = true;
 			$this->button_import = false;
-			$this->button_export = true;
-			$this->table = "customreports";
+			$this->button_export = false;
+			$this->table = "report_drywaste";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
@@ -179,7 +179,7 @@
 	        | $this->load_js[] = asset("myfile.js");
 	        |
 	        */
-	        $this->load_js = array();
+	        $this->load_js = array(asset("js/export/dataTables.buttons.min.js"), asset("js/export/jszip.min.js"), asset("js/export/pdfmake.min.js"), asset("js/export/vfs_fonts.js"), asset("js/export/buttons.html5.min.js"), asset("js/export/buttons.colVis.min.js"));
 	        
 	        
 	        
@@ -328,7 +328,7 @@
 		   //Create your own query 
 		   $data = [];
 		   $data['page_title'] = 'Dry Waste Report';
-		   $data['result'] = DB::table('collectionmain')->orderby('id','desc')->paginate(10);
+		   $data['result'] = DB::table('report_drywaste')->orderby('id','desc')->paginate(1000);
 		    
 		   //Create a view. Please use `cbView` method instead of view method from laravel.
 		   $this->cbView('reports.dry_waste_report_view',$data);

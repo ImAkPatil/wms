@@ -15,7 +15,7 @@
 			$this->orderby = "id,desc";
 			$this->global_privilege = false;
 			$this->button_table_action = true;
-			$this->button_bulk_action = true;
+			$this->button_bulk_action = false;
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
 			$this->button_edit = true;
@@ -32,12 +32,10 @@
 			$this->col = [];
 			$this->col[] = ["label"=>"Customer Name","name"=>"ID_FkCustomerID","join"=>"customerdetails,CustomerName"];
 			$this->col[] = ["label"=>"Sales Date","name"=>"SalesDate"];
-			$this->col[] = ["label"=>"Waste Sub Type","name"=>"ID_PkWasteSCID","join"=>"masterwastesubcategories,SubCategoryName"];
-			$this->col[] = ["label"=>"Category","name"=>"ID_FkCategoryID","join"=>"mastercategory,Category"];
-			$this->col[] = ["label"=>"Sales Quantity","name"=>"SalesQty"];
-			$this->col[] = ["label"=>"Amount","name"=>"Amount"];
-			$this->col[] = ["label"=>"Status","name"=>"IsActive"];
-			$this->col[] = ["label"=>"Added On","name"=>"ActionOn"];
+			$this->col[] = ["label"=>"Total Sales Quantity","name"=>"TotalSalesQty"];
+			$this->col[] = ["label"=>"Total Amount","name"=>"TotalAmount"];
+			$this->col[] = ["label"=>"Status","name"=>"IsActive","callback_php"=>'($row->IsActive==1)?Active:InActive'];
+			$this->col[] = ["label"=>"Added On","name"=>"ActionOn","callback_php"=>'date("d/m/Y h:i:s A",strtotime($row->ActionOn))'];
 			$this->col[] = ["label"=>"Added By","name"=>"UserID","join"=>"cms_users,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -45,17 +43,24 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'Sales Date','name'=>'SalesDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-10'];
 			
-			$this->form[] = ['label'=>'Customer Name','name'=>'ID_FkCustomerID','type'=>'select2','width'=>'col-sm-10','datatable'=>'customerdetails,CustomerName', 'validation'=>'required|date','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Customer Name','name'=>'ID_FkCustomerID','type'=>'select2','width'=>'col-sm-10','datatable'=>'customerdetails,CustomerName', 'validation'=>'required','width'=>'col-sm-10'];
 
-			$this->form[] = ['label'=>'Waste Type','name'=>'ID_PkWasteID','type'=>'select2','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
+			//$columns[] = ['label'=>'Waste Type','name'=>'ID_PkWasteID','type'=>'select2','width'=>'col-sm-10','datatable'=>'masterwastecategories,CategoryName'];
 
-			$this->form[] = ['label'=>'Waste Sub Type','name'=>'ID_PkWasteSCID','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastesubcategories,SubCategoryName'];
-			$this->form[] = ['label'=>'Category','name'=>'ID_FkCategoryID','type'=>'select2','width'=>'col-sm-10','datatable'=>'mastercategory,Category'];
+			$columns[] = ['label'=>'Waste Sub Type','name'=>'ID_PkWasteSCID','type'=>'select','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'masterwastesubcategories,SubCategoryName', 'required'=>true];
+			$columns[] = ['label'=>'Category','name'=>'ID_FkCategoryID','type'=>'select','width'=>'col-sm-10','datatable'=>'mastercategory,Category'];
 
-			$this->form[] = ['label'=>'Stock Quantity','name'=>'StockQuantity','type'=>'text','width'=>'col-sm-10', 'readonly' => true];
+			//$columns[] = ['label'=>'Stock Quantity','name'=>'StockQuantity','type'=>'text','width'=>'col-sm-10', 'readonly' => true];
 
-			$this->form[] = ['label'=>'Sales Quantity','name'=>'SalesQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Sales Amount','name'=>'Amount','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$columns[] = ['label'=>'Sales Quantity','name'=>'SalesQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'required'=>true];
+			$columns[] = ['label'=>'Sales Amount','name'=>'Amount','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'required'=>true];
+
+			$this->form[] = ['label'=>'Sales Detail','name'=>'salesdetail','type'=>'child','width'=>'col-sm-10','columns'=>$columns,'table'=>'salessubdetails','foreign_key'=>'ID_FkSalesID'];
+
+			$this->form[] = ['label'=>'Total Sales Quantity','name'=>'TotalSalesQty','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'readonly' => true];
+			$this->form[] = ['label'=>'Total Sales Amount','name'=>'TotalAmount','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10', 'readonly'=>true];
+
+
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -215,7 +220,9 @@
 	        | $this->style_css = ".style{....}";
 	        |
 	        */
-	        $this->style_css = "tfoot{display:none;}";
+	        $this->style_css = "tfoot{display:none;} .disabled.day{
+	       	color:#9b9898 !important;
+	       } ";
 	        
 	        
 	        
@@ -293,7 +300,6 @@
 	    */
 	    public function hook_after_add($id) {        
 	        //Your code here
-
 	    }
 
 	    /* 
@@ -334,6 +340,7 @@
 	    public function hook_before_delete($id) {
 	        //Your code here
 	    	DB::table('salesdetails')->where('id',$id)->update(['IsActive' => 0]);
+	    	DB::table('salessubdetails')->where('ID_FkSalesID',$id)->update(['deleted_at' => date('Y-m-d H:i:s')]);
 	    }
 
 	    /* 
@@ -359,5 +366,87 @@
 	    	}
 	    	echo json_encode($wasteCategory);exit;
 	    }
+
+	    public function getsalesstock(){
+	    	$stock = 0;$response = array();
+	    	$wasteId = $_POST['wasteId'];
+	    	$wasteSubId = $_POST['wasteSubId'];
+	    	if (!empty($wasteId) && !empty($wasteSubId)) {
+		    	if ($wasteId == 1) { //Wet Waste Type
+		    		$compost_result = DB::table('compostmain')->select(DB::raw('SUM(TotalQty) as stock'))->join('compostdetail', 'compostmain.id', '=', 'compostdetail.ID_FkCompostID')->join('masterwastesubcategories', 'masterwastesubcategories.id', '=', 'compostdetail.ID_FkWasteSCID')->where('ID_FkWasteSCID',$wasteSubId)->where('compostmain.IsActive', 1)->get();
+
+		    		if (!empty($compost_result)) {
+			    		$tempcStock = 0;
+			    		foreach ($compost_result as $key => $value) {
+			    	 		$tempcStock = $tempcStock + $value->stock;
+			    	 	} 
+		    		$cstock = $tempcStock;
+		    		}
+
+		    		$sale_result = DB::table('salesdetails')->select(DB::raw('SUM(TotalSalesQty) as stock'))->join('salessubdetails', 'salesdetails.id', '=', 'salessubdetails.ID_FkSalesID')->where('salessubdetails.ID_PkWasteSCID',$wasteSubId)->where('salesdetails.IsActive', 1)->get();
+
+		    		if (!empty($sale_result)) {
+			    		$tempsStock = 0;
+			    		foreach ($sale_result as $key => $value) {
+			    	 		$tempsStock = $tempsStock + $value->stock;
+			    	 	} 
+			    		$sstock = $tempsStock;
+
+			    	}
+			    	$stock = $cstock - $sstock;
+
+		    	} else { //other
+		    		
+		    		$compost_result = DB::table('processingdetails')->select(DB::raw('SUM(ProcessQty) as stock'))->where('ID_PkWasteSCID',$wasteSubId)->where('processingdetails.IsActive', 1)->get();
+
+		    		if (!empty($compost_result)) {
+			    		$tempcStock = 0;
+			    		foreach ($compost_result as $key => $value) {
+			    	 		$tempcStock = $tempcStock + $value->stock;
+			    	 	} 
+		    		$cstock = $tempcStock;
+		    		}
+
+		    		$sale_result = DB::table('salesdetails')->select(DB::raw('SUM(TotalSalesQty) as stock'))->join('salessubdetails', 'salesdetails.id', '=', 'salessubdetails.ID_FkSalesID')->where('salessubdetails.ID_PkWasteSCID',$wasteSubId)->where('salesdetails.IsActive', 1)->get();
+
+		    		if (!empty($sale_result)) {
+			    		$tempsStock = 0;
+			    		foreach ($sale_result as $key => $value) {
+			    	 		$tempsStock = $tempsStock + $value->stock;
+			    	 	} 
+			    		$sstock = $tempsStock;
+
+			    	}
+			    	$stock = $cstock - $sstock;
+		    	}
+
+		    }	
+	    	echo json_encode($stock);exit;
+	    }
+
+	    public function getwastetype(){
+	    	$response = array();
+	    	$wasteType = DB::table('masterwastecategories')->select('id', 'CategoryName')->where('IsActive', 1)->get();
+	    	echo json_encode($wasteType);exit;
+	    }
+
+	    public function getDetail($id) {
+		  //Create an Auth
+		  if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {    
+		    CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+		  }
+		  $data = [];
+		  $data['page_title'] = 'Detail Data';
+		  $data['row'] = DB::table('salesdetails')
+		  					->select('CustomerName','SalesDate','TotalSalesQty','TotalAmount','SalesQty','Amount','Category','SubCategoryName')
+		  					->join('customerdetails', 'customerdetails.id', '=', 'salesdetails.ID_FkCustomerID')
+		  					->join('salessubdetails', 'salesdetails.id', '=', 'salessubdetails.ID_FkSalesID')
+		  					->join('masterwastesubcategories', 'masterwastesubcategories.id', '=', 'salessubdetails.ID_PkWasteSCID','left')
+		  					->join('mastercategory', 'mastercategory.id', '=', 'salessubdetails.ID_FkCategoryID','left')
+		  					->where('salesdetails.id',$id)
+		  					->get();
+		  //Please use cbView method instead view method from laravel
+		  $this->cbView('sales.custom_detail_view',$data);
+		}
 
 	}

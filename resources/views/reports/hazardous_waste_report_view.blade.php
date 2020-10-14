@@ -3,7 +3,7 @@
 @section('content')
 <!-- Your custom  HTML goes here -->
 <div class="col-lg-12" style="line-height:30px;">
-  <form method="GET" action="<?php echo URL::to('admin/wetwastereport'); ?>" class ="form-horizontal" role ="form">
+  <form method="GET" action="<?php echo URL::to('admin/hazardousreport'); ?>" class ="form-horizontal" role ="form">
     <div class="form-group">
       <div class="col-md-2 pull-left" id="dtrng">
         <label>Date Filter</label>
@@ -35,10 +35,9 @@
       <tr>
         <th>Sr. No.</th>
         <th>Type of Processing</th>
-        <th>Capacity</th>
-        <th>Actual Intake</th>
         <th>Actual Processing</th>
-        <th>Stock</th>
+        <th>Stock Qty</th>
+        <th>Sales Qty</th>
        </tr>
   </thead>
   <tbody>
@@ -46,18 +45,17 @@
       <tr>
         <td>{{ ($k + 1) }}</td>
         <td>{{ $row->SubCategoryName }}</td>
-        <td>{{ $row->Capacity }}</td>
-        <td>{{ $row->ActaulIntake }}</td>
-        <td>{{ $row->ActaulProcessing }}</td>
-        <td>{{ $row->CompostGenQty }}</td>
+        <td>{{ $row->ActaulProcessingQty }}</td>
+        <td>{{ $row->StockQty }}</td>
+        <td>{{ $row->SalesQty }}</td>
       </tr>
       @endforeach
       <tfoot>
         <tr>
-        <td colspan="3">TOTAL</td>
-        <td>{{ $result->sum('ActaulIntake')  }}</td>
-        <td>{{ $result->sum('ActaulProcessing') }}</td>
-        <td>{{ $result->sum('CompostGenQty') }}</td>
+        <td colspan="2">TOTAL</td>
+        <td>{{ $result->sum('ActaulProcessingQty')  }}</td>
+        <td>{{ $result->sum('StockQty') }}</td>
+        <td>{{ $result->sum('SalesQty') }}</td>
       </tr>
       </tfoot>
   </tbody>
